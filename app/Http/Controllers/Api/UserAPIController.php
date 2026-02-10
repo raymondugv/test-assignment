@@ -65,15 +65,17 @@ class UserAPIController extends Controller
 
         $user = Auth::user();
 
-        if (! $user || $user->id != $id) {
+        if (! $user || (string) $user->id !== (string) $id) {
             return $this->errorResponse('Unauthorized access', null, 403);
         }
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+        if (array_key_exists('password', $validated) && $validated['password'] !== null && $validated['password'] !== '') {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
 
         return $this->successResponse(new UserResource($user), 'User updated successfully');
     }
