@@ -22,7 +22,7 @@ abstract class Controller
             'success' => false,
             'message' => $message,
             'data' => null,
-            'errors' => $errors,
+            'error' => $errors,
         ], $status);
     }
 }
