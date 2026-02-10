@@ -3,12 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserLoginRequest;
+use App\Http\Requests\UserRegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class UserAuthController extends Controller
 {
+    public function register(UserRegisterRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        return $this->successResponse(new UserResource($user), 'User registered successfully');
+
+    }
+
     public function login(UserLoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
