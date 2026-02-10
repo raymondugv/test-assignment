@@ -11,7 +11,6 @@ class UserLoginRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Cho phép tất cả người dùng (chưa đăng nhập) được thực hiện request login
         return true;
     }
 
