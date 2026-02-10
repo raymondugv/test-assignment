@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserLoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,7 +24,18 @@ class UserAuthController extends Controller
         return $this->successResponse([
             'token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'user' => new UserResource($user),
         ], 'Login successful');
+    }
+
+    public function logout(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user && method_exists($user, 'currentAccessToken') && $token = $user->currentAccessToken()) {
+            $token->delete();
+        }
+
+        return $this->successResponse(null, 'Successfully logged out');
     }
 }
