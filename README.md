@@ -1,59 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Assessment MC — Laravel API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 REST API with user authentication (Laravel Sanctum) and CRUD for **Users** and **Posts**. All responses use a consistent JSON shape with `success`, `message`, `data`, and `errors`.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.2+
+- Composer
+- SQLite (default) or MySQL/PostgreSQL via `.env`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Installation
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Learning Laravel
+For SQLite (default in `.env.example`):
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+touch database/database.sqlite
+php artisan migrate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+For MySQL/PostgreSQL, set `DB_*` in `.env` and run:
 
-## Laravel Sponsors
+```bash
+php artisan migrate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Optional: seed posts (requires users to exist):
 
-### Premium Partners
+```bash
+php artisan db:seed
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Running the app
 
-## Contributing
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+API base URL: **http://localhost:8000/api** (or your `APP_URL` + `/api`).
 
-## Code of Conduct
+## Authentication
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The API uses **Laravel Sanctum** with Bearer tokens.
 
-## Security Vulnerabilities
+1. **Register** — `POST /api/register`
+   Body: `name`, `email`, `password`, `password_confirmation`
+   Returns user (no token).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Login** — `POST /api/login`
+   Body: `email`, `password`
+   Returns `token`, `token_type` (`Bearer`), and `user`. Use the token in subsequent requests.
 
-## License
+3. **Protected routes** — Send header:
+   `Authorization: Bearer <token>`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+4. **Logout** — `POST /api/logout` (authenticated)
+   Revokes the current token.
+
+## API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/register` | No | Register a new user |
+| POST | `/api/login` | No | Login; returns Bearer token |
+| POST | `/api/logout` | Yes | Revoke current token |
+| GET | `/api/users` | Yes | List users (paginated, `?per_page=15`) |
+| POST | `/api/users` | Yes | Create user (admin-style) |
+| GET | `/api/users/{id}` | Yes | Get user (own profile only) |
+| PUT/PATCH | `/api/users/{id}` | Yes | Update user (own profile only) |
+| DELETE | `/api/users/{id}` | Yes | Delete user (own account only) |
+| GET | `/api/posts` | Yes | List posts (paginated, `?per_page=15`) |
+| POST | `/api/posts` | Yes | Create post (author = current user) |
+| GET | `/api/posts/{id}` | Yes | Get single post |
+| PUT/PATCH | `/api/posts/{id}` | Yes | Update post (author only) |
+| DELETE | `/api/posts/{id}` | Yes | Delete post (author only) |
+
+## Request / Response format
+
+**Success response:**
+
+```json
+{
+  "success": true,
+  "message": "Optional message",
+  "data": { ... },
+  "errors": null
+}
+```
+
+**Error response:**
+
+```json
+{
+  "success": false,
+  "message": "Error message",
+  "data": null,
+  "errors": { ... }
+}
+```
+
+Validation errors appear in `errors` (e.g. Laravel validation structure). Unauthorized/forbidden use HTTP 401 or 403 with the same shape.
+
+## Validation (summary)
+
+- **Register:** `name` (required), `email` (required, unique), `password` (required, min 8, confirmed).
+- **Login:** `email` (required), `password` (required).
+- **User (store/update):** `name`, `email` (unique where applicable), `password` (min 8, confirmed; optional on update).
+- **Post (store):** `title` (required), `slug` (required, unique), `content` (required). `author_id` is set from the authenticated user.
+- **Post (update):** `title`, `slug`, `content` — all optional; slug must stay unique excluding current post.
+
+## Tech stack
+
+- Laravel 12
+- Laravel Sanctum (API tokens)
+- SQLite by default (configurable via `.env`)
+- Form Requests for validation
+- API Resources for User and Post responses (UserResource, PostResource)
