@@ -17,7 +17,11 @@ class UserAPIController extends Controller
      */
     public function index(): JsonResponse
     {
-        return $this->successResponse(UserResource::collection(User::paginate(15)));
+        $perPage = request()->query('per_page', 15);
+
+        $users = User::paginate($perPage);
+
+        return $this->successResponse(UserResource::collection($users));
     }
 
     /**
