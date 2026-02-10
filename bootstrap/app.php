@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,18 +23,18 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, $request) {
-            if ($request->expectsJson()) {
-                return ApiResponse::error('You are not authenticated.', null, 401);
-            }
-
-            return response('You are not authenticated.', 401);
+            return ApiResponse::error('You are not authenticated.', null, 401);
         });
 
         $exceptions->render(function (ModelNotFoundException $e, $request) {
-            if ($request->expectsJson()) {
-                return ApiResponse::error('Not found.', null, 404);
-            }
+            return ApiResponse::error('Not found.', null, 404);
+        });
 
-            return response('Not found.', 404);
+        $exceptions->render(function (ValidationException $e, $request) {
+            return ApiResponse::error($e->getMessage(), $e->errors(), 422);
+        });
+
+        $exceptions->render(function (Exception $e, $request) {
+            return ApiResponse::error($e->getMessage(), null, 500);
         });
     })->create();
