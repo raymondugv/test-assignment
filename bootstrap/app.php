@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Middleware\Authenticate;
 use App\Responses\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
