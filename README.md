@@ -53,6 +53,10 @@ Or via Composer: `composer test`
 
 API base URL: **http://localhost:8000/api** (or your `APP_URL` + `/api`).
 
+## Postman collection
+
+A Postman collection (`MadalaCode.postman_collection.json`) is included. Import it into Postman, set the `API_URL` variable to your base URL (e.g. `http://localhost:8000`), then run **Login** and set `ACCESS_TOKEN` to the Bearer token returned for authenticated requests.
+
 ## Authentication
 
 The API uses **Laravel Sanctum** with Bearer tokens.
