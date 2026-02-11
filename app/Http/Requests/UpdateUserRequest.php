@@ -12,7 +12,14 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check() && Auth::id() === $this->route('user');
+        return Auth::check() && (string) Auth::id() === (string) $this->getRouteUserId();
+    }
+
+    protected function getRouteUserId(): string|int
+    {
+        $user = $this->route('user');
+
+        return $user instanceof \App\Models\User ? $user->id : $user;
     }
 
     /**
@@ -24,7 +31,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,'.$this->user,
+            'email' => 'sometimes|email|unique:users,email,'.$this->getRouteUserId(),
             'password' => 'sometimes|nullable|string|min:8|confirmed',
         ];
     }
