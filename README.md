@@ -41,6 +41,16 @@ php artisan db:seed
 php artisan serve
 ```
 
+## Testing
+
+Run the unit tests:
+
+```bash
+php artisan test
+```
+
+Or via Composer: `composer test`
+
 API base URL: **http://localhost:8000/api** (or your `APP_URL` + `/api`).
 
 ## Authentication
@@ -120,3 +130,4 @@ Validation errors appear in `errors` (e.g. Laravel validation structure). Unauth
 - SQLite by default (configurable via `.env`)
 - Form Requests for validation
 - API Resources for User and Post responses (UserResource, PostResource)
+- PHPUnit (unit testing)
